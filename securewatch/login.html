@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SecureWatch | Login</title>
+    <link href="https://googleapis.com" rel="stylesheet">
+    
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Poppins', sans-serif;
+            background: #cbd5e1; 
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            min-height: 480px; 
+            display: flex;
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        }
+
+        /* LEFT COLUMN */
+        .col-left {
+            width: 45%;
+            background: #0f172a; 
+            color: white;
+            padding: 60px 40px;
+            display: flex;
+            flex-direction: column;
+            /* Changed to flex-start so we can manually control the height of Request Access */
+            justify-content: flex-start; 
+        }
+
+        .col-left h2 {
+            font-size: 32px;
+            margin: 0;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .col-left h2 span { color: #dc2626; }
+
+        .col-left p {
+            font-size: 14px;
+            color: #94a3b8;
+            margin: 25px 0 0 0;
+            line-height: 1.6;
+        }
+
+        /* Normal Text Style for Request Access */
+        .txt-request {
+            color: #94a3b8;
+            text-decoration: none;
+            font-size: 13px;
+            transition: .3s;
+            cursor: pointer;
+            background: none;
+            border: none;
+            padding: 0;
+            text-align: left;
+            margin-top: 200px; 
+        }
+
+        .txt-request:hover {
+            color: rgb(0, 0, 0);
+            text-decoration: underline;
+        }
+
+        /* RIGHT COLUMN */
+        .col-right {
+            width: 55%;
+            padding: 60px 50px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            background: white;
+        }
+
+        .login-form h3 {
+            font-size: 24px;
+            color: #1e293b;
+            margin: 0;
+        }
+
+        .login-form span {
+            font-size: 13px;
+            color: #64748b;
+            display: block;
+            margin-bottom: 30px;
+        }
+
+        .input-group { margin-bottom: 15px; }
+
+        label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #475569;
+            margin-left: 15px;
+        }
+
+        input {
+            width: 100%;
+            padding: 14px 20px;
+            margin-top: 5px;
+            border-radius: 30px;
+            border: 1px solid #e2e8f0;
+            outline: none;
+            box-sizing: border-box;
+            background: #f8fafc;
+            font-size: 16px;
+        }
+
+        .btn-signin {
+            width: 100%;
+            padding: 14px;
+            border-radius: 30px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: .3s;
+            background: #0f172a;
+            color: white;
+            border: none;
+            margin-top: 20px;
+        }
+
+        .btn-signin:hover { background: #dc2626; }
+
+        .forgot {
+            text-align: center;
+            margin-top: 15px;
+            font-size: 12px;
+            color: #94a3b8;
+            text-decoration: none;
+            display: block;
+        }
+
+        /* MOBILE RESPONSIVE LOGIC */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column; 
+                height: auto;
+                max-width: 450px;
+            }
+
+            .col-left, .col-right {
+                width: 100%;
+                padding: 40px 30px;
+                box-sizing: border-box;
+            }
+
+            .col-left {
+                text-align: center;
+                order: 1;
+            }
+
+            .col-right {
+                order: 2;
+            }
+
+            .txt-request {
+                text-align: center;
+                margin: 20px auto 0 auto;
+                display: block;
+                color: #64748b; /* Changed for mobile readability */
+            }
+
+            /* Hides desktop request link and shows mobile version if needed */
+            .col-left .txt-request { display: none; }
+            .mobile-footer { display: block; margin-top: 15px; text-align: center; }
+        }
+
+        @media (min-width: 769px) {
+            .mobile-footer { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- LEFT PANEL -->
+    <div class="col-left">
+        <div>
+            <h2>SECURE<span>WATCH</span></h2>
+            <p>MDRRMO Bato Smart CCTV Monitoring. Real-time commotion detection with automated SMS alerts.</p>
+        </div>
+        <!-- Desktop: No account? Request Access -->
+        <button class="txt-request" onclick="alert('Request sent to Admin')">No account? Request Access</button>
+    </div>
+
+    <!-- RIGHT PANEL -->
+    <div class="col-right">
+        <div class="login-form">
+            <h3>Welcome Back</h3>
+            <span>Enter credentials to monitor.</span>
+
+            <div class="input-group">
+                <label>USERNAME</label>
+                <input type="text" id="username" placeholder="username">
+            </div>
+
+            <div class="input-group">
+                <label>PASSWORD</label>
+                <input type="password" id="password" placeholder="password">
+            </div>
+
+            <button class="btn-signin" onclick="login()">Sign In</button>
+            <a href="#" class="forgot">Trouble signing in? Contact Admin</a>
+            
+            <!-- Mobile Footer (Shows below Forgot Password on mobile) -->
+            <div class="mobile-footer">
+                <button class="txt-request" onclick="alert('Request sent to Admin')">Request Access</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const defaultUsers = [
+        { username: "Admin", password: "12345", role: "admin" },
+        { username: "Leonard", password: "a12345", role: "operator" },
+        { username: "MDRRMO", password: "bato", role: "operator" }
+    ];
+
+    function login(){
+        let user = document.getElementById("username").value;
+        let pass = document.getElementById("password").value;
+        const foundUser = defaultUsers.find(u => u.username === user && u.password === pass);
+
+        if(foundUser){
+            localStorage.setItem("loggedIn", "true");
+            localStorage.setItem("user", foundUser.username);
+            localStorage.setItem("userRole", foundUser.role);
+            
+            // Redirect based on role
+            if(foundUser.role === 'admin'){
+                window.location.href = "index.html";
+            } else {
+                window.location.href = "index.html";
+            }
+        } else {
+            alert("⚠️ Invalid Login");
+        }
+    }
+</script>
+
+</body>
+</html>

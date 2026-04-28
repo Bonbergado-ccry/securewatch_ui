@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SecureWatch | Operator View</title>
+    <link href="https://googleapis.com" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            margin: 0; font-family: 'Poppins', sans-serif;
+            background: #020617; color: white; display: flex;
+            height: 100vh; width: 100vw; overflow: hidden;
+        }
+
+        /* SIDEBAR (Simplified for Operator) */
+        .sidebar {
+            width: 260px; background: #111827; display: flex;
+            flex-direction: column; padding: 20px 15px;
+            border-right: 1px solid #1f2937; transition: 0.3s;
+        }
+        .sidebar.collapsed { width: 80px; padding: 20px 10px; }
+        .sidebar h2 { font-size: 1.1rem; font-weight: 800; color: #ef4444; margin-bottom: 30px; }
+        .sidebar.collapsed h2, .sidebar.collapsed span { display: none; }
+
+        .menu-item {
+            height: 44px; padding: 0 12px; border-radius: 10px;
+            text-decoration: none; color: #9ca3af; font-size: 14px;
+            display: flex; align-items: center; transition: 0.2s; margin-bottom: 8px;
+        }
+        .menu-item svg { width: 20px; height: 20px; flex-shrink: 0; fill: none; stroke: currentColor; stroke-width: 2; }
+        .menu-item:hover, .menu-item.active { background: #1f2937; color: white; }
+        .menu-item.active { background: #dc2626; }
+        .sidebar.collapsed .menu-item { justify-content: center; padding: 0; }
+
+        /* MAIN CONTENT */
+        .main-container { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+        header {
+            padding: 0 25px; height: 70px; background: #111827;
+            display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 1px solid #1f2937;
+        }
+
+        .grid-container {
+            flex: 1; padding: 20px; display: grid;
+            grid-template-columns: repeat(2, 1fr); gap: 15px; overflow-y: auto;
+        }
+        .cam-box {
+            background: #000; border-radius: 12px; position: relative;
+            aspect-ratio: 16 / 9; border: 1px solid #1f2937; overflow: hidden;
+        }
+        .cam-box img { width: 100%; height: 100%; object-fit: cover; opacity: 0.8; }
+        .cam-name { position: absolute; top: 12px; left: 12px; background: rgba(0,0,0,0.7); padding: 4px 10px; font-size: 11px; font-weight: 800; border-radius: 4px; border-left: 3px solid #ef4444; }
+
+        /* ALERT PANEL (Right) */
+        .alert-panel { width: 300px; background: #111827; border-left: 1px solid #1f2937; padding: 20px; }
+        .alert-item { background: #020617; padding: 15px; border-left: 4px solid #dc2626; border-radius: 8px; margin-bottom: 15px; }
+        
+        .logout-btn { margin-top: auto; color: #ef4444; font-weight: 600; text-decoration: none; display: flex; align-items: center; gap: 10px; padding: 10px; border-radius: 10px; background: rgba(239, 68, 68, 0.1); }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar" id="sidebar">
+        <h2 id="side-title">SECUREWATCH</h2>
+        <a href="#" class="menu-item active">
+            <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+            <span style="margin-left: 15px;">Monitoring</span>
+        </a>
+        <a href="logs.html" class="menu-item">
+            <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+            <span style="margin-left: 15px;">Incident Logs</span>
+        </a>
+        <a href="#" class="logout-btn" onclick="logout()">
+            <span>Logout</span>
+        </a>
+    </div>
+
+    <div class="main-container">
+        <header>
+            <div id="user-display" style="font-size: 14px;">User: Loading...</div>
+            <div id="clock" style="color: #ef4444; font-weight: bold;">00:00:00 PM</div>
+        </header>
+
+        <div class="grid-container">
+            <div class="cam-box"><div class="cam-name">CAM 01</div><img src="assets/cctv1.gif"></div>
+            <div class="cam-box"><div class="cam-name">CAM 02</div><img src="assets/cctv2.gif"></div>
+            <div class="cam-box"><div class="cam-name">CAM 03</div><img src="assets/cctv3.gif"></div>
+            <div class="cam-box"><div class="cam-name">CAM 04</div><img src="assets/black.png"></div>
+        </div>
+    </div>
+
+    <div class="alert-panel">
+        <h3 style="font-size: 14px; color: #ef4444;">LIVE ALERTS</h3>
+        <div class="alert-item">
+            <strong>⚠️ COMMOTION</strong><br>
+            <small>Verify feed CAM 01</small>
+        </div>
+    </div>
+
+    <script>
+        // Security Check: Operator side should be accessible by anyone logged in
+        if (localStorage.getItem("loggedIn") !== "true") {
+            window.location.href = "login.html";
+        }
+
+        const user = localStorage.getItem("user");
+        const role = localStorage.getItem("userRole");
+        document.getElementById('user-display').innerText = `Operator: ${user}`;
+
+        setInterval(() => {
+            document.getElementById('clock').innerText = new Date().toLocaleTimeString();
+        }, 1000);
+
+        function logout() {
+            localStorage.clear();
+            window.location.href = "login.html";
+        }
+    </script>
+</body>
+</html>
