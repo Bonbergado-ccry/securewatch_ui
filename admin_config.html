@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SecureWatch | AI Configuration</title>
+    <style>
+        @import url('https://googleapis.com');
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #020617;
+            color: white;
+            display: flex;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+        }
+
+        /* --- SIDEBAR --- */
+        .sidebar {
+            width: 260px;
+            background: #111827;
+            display: flex;
+            flex-direction: column;
+            padding: 20px 15px;
+            border-right: 1px solid #1f2937;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1000;
+            flex-shrink: 0;
+        }
+
+        .sidebar.collapsed { width: 80px; padding: 20px 0; }
+
+        .sidebar-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            height: 40px;
+            padding: 0 10px;
+        }
+
+        .sidebar.collapsed .sidebar-header { justify-content: center; padding: 0; }
+
+        .sidebar h2 { font-size: 1.1rem; font-weight: 800; color: #ffffff; margin: 0; letter-spacing: 1px; white-space: nowrap; }
+        .sidebar h2 span { color: #dc2626; }
+        .sidebar.collapsed h2, .sidebar.collapsed .menu-text { display: none; }
+
+        .toggle-btn {
+            background: #111827; border: none; color: #9ca3af; cursor: pointer;
+            width: 40px; height: 40px; border-radius: 8px;
+            display: flex; align-items: center; justify-content: center; transition: 0.3s;
+        }
+        .toggle-btn:hover { color: #dc2626; background: #1e293b; }
+
+        .menu-links { display: flex; flex-direction: column; gap: 8px; flex-grow: 1; }
+        .menu-item {
+            height: 40px; padding: 0 12px; border-radius: 8px; text-decoration: none;
+            color: #9ca3af; font-size: 13px; display: flex; align-items: center; transition: 0.3s;
+        }
+        .menu-item svg { width: 18px; height: 18px; margin-right: 12px; flex-shrink: 0; fill: none; stroke: currentColor; stroke-width: 2; }
+        .sidebar.collapsed .menu-item { justify-content: center; padding: 0; width: 40px; margin: 0 auto; }
+        .sidebar.collapsed .menu-item svg { margin-right: 0; }
+
+        .menu-item:hover { background: rgba(255, 255, 255, 0.05); color: white; }
+        .menu-item.active { background: rgba(220, 38, 38, 0.15); color: #dc2626; border: 1px solid rgba(220, 38, 38, 0.3); }
+
+        .logout-btn {
+            margin-top: auto; background: rgba(220, 38, 38, 0.05); border: 1px solid rgba(220, 38, 38, 0.2);
+            color: #dc2626; height: 40px; border-radius: 8px; cursor: pointer; font-weight: 600;
+            display: flex; align-items: center; padding: 0 12px; text-decoration: none;
+        }
+        .logout-btn svg { width: 18px; height: 18px; margin-right: 12px; stroke: currentColor; fill: none; stroke-width: 2; }
+        .sidebar.collapsed .logout-btn { width: 40px; padding: 0; margin: 0 auto; justify-content: center; }
+        .sidebar.collapsed .logout-btn svg { margin-right: 0; }
+        .sidebar.collapsed .logout-text { display: none; }
+
+        /* --- MAIN CONTENT --- */
+        .main-container { flex: 1; display: flex; flex-direction: column; min-width: 0; overflow-y: auto; }
+        header { padding: 0 25px; height: 70px; background: #111827; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1f2937; flex-shrink: 0; }
+
+        .content-area { padding: 40px; display: flex; flex-direction: column; gap: 25px; align-items: center; }
+
+        .config-card {
+            background: #111827; padding: 30px; border-radius: 15px; width: 100%;
+            max-width: 800px; border: 1px solid #1f2937; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        h3 { margin: 0 0 20px 0; color: #dc2626; font-size: 1.1rem; border-bottom: 1px solid #1f2937; padding-bottom: 10px; text-transform: uppercase; letter-spacing: 1px; }
+
+        .setting-group { margin-bottom: 25px; }
+        label { display: block; font-size: 13px; margin-bottom: 10px; color: #94a3b8; font-weight: 600; }
+
+        /* STORAGE PROGRESS BAR */
+        .storage-container { width: 100%; background: #020617; height: 12px; border-radius: 10px; border: 1px solid #1f2937; overflow: hidden; margin: 10px 0; }
+        .storage-fill { width: 85%; background: linear-gradient(90deg, #10b981, #f59e0b, #dc2626); height: 100%; }
+
+        /* INPUTS */
+        input[type="range"] { width: 100%; accent-color: #dc2626; cursor: pointer; }
+        input[type="text"], select {
+            width: 100%; padding: 12px; background: #020617; border: 1px solid #1f2937; border-radius: 8px; color: white; outline: none; font-size: 13px;
+        }
+        input[type="text"]:focus { border-color: #dc2626; }
+
+        .val-display { float: right; color: #dc2626; font-weight: 800; font-family: monospace; }
+
+        .btn-save {
+            background: #dc2626; color: white; border: none; padding: 15px; border-radius: 8px;
+            font-weight: bold; cursor: pointer; transition: 0.3s; width: 100%; font-size: 14px; margin-top: 10px;
+        }
+        .btn-save:hover { background: #b91c1c; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(220, 38, 38, 0.3); }
+
+        .hint { font-size: 11px; color: #64748b; margin-top: 5px; font-style: italic; }
+
+        @media (max-width: 768px) { .content-area { padding: 20px; } }
+    </style>
+</head>
+<body>
+
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h2 class="menu-text">SECURE<span>WATCH</span></h2>
+            <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+        </div>
+        <div class="menu-links">
+            <a href="index.html" class="menu-item">
+                <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                <span class="menu-text">Monitoring</span>
+            </a>
+            <a href="logs.html" class="menu-item">
+                <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+                <span class="menu-text">Incident Logs</span>
+            </a>
+            <a href="playback.html" class="menu-item">
+                <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                <span class="menu-text">Playback</span>
+            </a>
+            <a href="admin_config.html" class="menu-item active">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                <span class="menu-text">AI Settings</span>
+            </a>
+            <a href="users.html" class="menu-item" id="users-link">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                <span class="menu-text">User Management</span>
+            </a>
+        </div>
+        <a href="login.html" class="logout-btn" onclick="localStorage.clear()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+            <span class="logout-text">Logout</span>
+        </a>
+    </nav>
+
+    <div class="main-container">
+        <header>
+            <div style="font-size: 14px; color: #9ca3af;">System Configuration</div>
+            <div id="clock" style="font-family: monospace; color: #dc2626; font-weight: bold; font-size: 1.1rem;">00:00:00 PM</div>
+        </header>
+
+        <div class="content-area">
+            <!-- STORAGE SECTION -->
+            <div class="config-card">
+                <h3>System Storage Management</h3>
+                <div class="setting-group">
+                    <label>HDD STORAGE USAGE <span class="val-display">85% Used</span></label>
+                    <div class="storage-container">
+                        <div class="storage-fill"></div>
+                    </div>
+                    <p class="hint">150.5 GB available of 1.0 TB. System will start overwriting soon.</p>
+                </div>
+                <div class="setting-group" style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <label style="margin-bottom: 0;">AUTO-OVERWRITE FOOTAGE</label>
+                        <p class="hint">Automatically delete oldest videos when disk is full.</p>
+                    </div>
+                    <input type="checkbox" checked style="width: 18px; height: 18px; accent-color: #dc2626;">
+                </div>
+            </div>
+
+            <!-- AI SECTION -->
+            <div class="config-card">
+                <h3>AI Parameter Calibration</h3>
+                <div class="setting-group">
+                    <label>CONFIDENCE THRESHOLD <span class="val-display" id="conf-val">0.75</span></label>
+                    <input type="range" min="0.5" max="0.99" step="0.01" value="0.75" oninput="document.getElementById('conf-val').innerText = this.value">
+                </div>
+                <div class="setting-group">
+                    <label>DETECTION DELAY (Seconds) <span class="val-display" id="delay-val">3s</span></label>
+                    <input type="range" min="1" max="10" step="1" value="3" oninput="document.getElementById('delay-val').innerText = this.value + 's'">
+                </div>
+            </div>
+
+            <!-- NOTIFICATION SECTION -->
+            <div class="config-card">
+                <h3>Notification Settings</h3>
+                <div class="setting-group">
+                    <label>MDRRMO RESPONDER HOTLINE</label>
+                    <input type="text" value="09123456789">
+                </div>
+                <button class="btn-save" onclick="alert('Configuration Saved!')">APPLY CHANGES</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleSidebar() { document.getElementById('sidebar').classList.toggle('collapsed'); }
+        setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleTimeString(); }, 1000);
+        // Security Check: Dapat Admin lang ang nakakakita nito
+if (localStorage.getItem("userRole") !== "admin") {
+    alert("Access Denied! Admins only.");
+    window.location.href = "index.html"; // Balik sa Monitoring kung hindi admin
+}
+
+// I-display ang role sa sidebar kung gusto mo (Optional)
+const userRole = localStorage.getItem("userRole") || "Operator";
+document.getElementById('user-display').innerText = userRole.toUpperCase();
+
+    </script>
+</body>
+</html>

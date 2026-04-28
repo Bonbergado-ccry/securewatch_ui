@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SecureWatch | Video Review</title>
+    <style>
+        @import url('https://googleapis.com');
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #020617;
+            color: white;
+            display: flex;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+        }
+
+        /* --- SIDEBAR --- */
+        .sidebar {
+            width: 260px;
+            background: #111827;
+            display: flex;
+            flex-direction: column;
+            padding: 20px 15px;
+            border-right: 1px solid #1f2937;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1000;
+            flex-shrink: 0;
+        }
+
+        .sidebar.collapsed { width: 80px; padding: 20px 0; }
+
+        .sidebar-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            height: 40px;
+            padding: 0 10px;
+        }
+
+        .sidebar.collapsed .sidebar-header { 
+            justify-content: center; 
+            padding: 0; 
+        }
+
+        .sidebar h2 { 
+            font-size: 1.1rem; 
+            font-weight: 800; 
+            color: #ffffff; 
+            margin: 0; 
+            letter-spacing: 1px; 
+            white-space: nowrap;
+        }
+        .sidebar h2 span { color: #dc2626; }
+
+        .sidebar.collapsed h2, .sidebar.collapsed .menu-text { 
+            display: none; 
+        }
+
+        .toggle-btn {
+            background: #111827; border: none; color: #9ca3af; cursor: pointer;
+            width: 40px; height: 40px; border-radius: 8px;
+            display: flex; align-items: center; justify-content: center; 
+            transition: 0.3s;
+        }
+        .toggle-btn:hover { color: #dc2626; background: #1e293b; }
+
+        .menu-links { display: flex; flex-direction: column; gap: 8px; flex-grow: 1; }
+
+        .menu-item {
+            height: 40px;
+            padding: 0 12px;
+            border-radius: 8px;
+            text-decoration: none;
+            color: #9ca3af;
+            font-size: 13px;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            white-space: nowrap;
+        }
+
+        .menu-item svg { width: 18px; height: 18px; margin-right: 12px; flex-shrink: 0; fill: none; stroke: currentColor; stroke-width: 2; }
+        
+        .sidebar.collapsed .menu-item { justify-content: center; padding: 0; width: 40px; margin: 0 auto; }
+        .sidebar.collapsed .menu-item svg { margin-right: 0; }
+
+        .menu-item:hover { background: rgba(255, 255, 255, 0.05); color: white; }
+        .menu-item.active { background: rgba(220, 38, 38, 0.15); color: #dc2626; border: 1px solid rgba(220, 38, 38, 0.3); }
+
+        /* LOGOUT BUTTON FIX */
+        .logout-btn {
+            margin-top: auto;
+            background: rgba(220, 38, 38, 0.05);
+            border: 1px solid rgba(220, 38, 38, 0.2);
+            color: #dc2626;
+            height: 40px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13px;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            padding: 0 12px;
+            text-decoration: none;
+        }
+        .logout-btn svg { width: 18px; height: 18px; margin-right: 12px; flex-shrink: 0; stroke: currentColor; fill: none; stroke-width: 2; }
+        
+        .logout-btn:hover { background: #dc2626; color: white; }
+        
+        .sidebar.collapsed .logout-btn { 
+            width: 40px; 
+            padding: 0; 
+            margin: 0 auto; 
+            justify-content: center; 
+        }
+        .sidebar.collapsed .logout-btn svg { margin-right: 0; }
+        .sidebar.collapsed .logout-text { display: none; }
+
+        /* --- MAIN CONTENT --- */
+        .main-container { flex: 1; display: flex; flex-direction: column; min-width: 0; overflow: hidden; }
+
+        header { padding: 0 25px; height: 70px; background: #111827; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1f2937; }
+
+        .playback-content {
+            flex: 1;
+            display: flex;
+            padding: 20px;
+            gap: 20px;
+            overflow-y: auto;
+        }
+
+        .player-section { flex: 1; display: flex; flex-direction: column; gap: 15px; min-width: 0; }
+        
+        .main-player {
+            background: #000;
+            border-radius: 12px;
+            border: 1px solid #1f2937;
+            aspect-ratio: 16/9;
+            width: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .main-player video { width: 100%; height: 100%; object-fit: contain; }
+
+        .timeline-container { background: #111827; border-radius: 12px; padding: 20px; border: 1px solid #1f2937; }
+        .timeline-bar { height: 40px; background: #020617; border-radius: 6px; position: relative; cursor: pointer; border: 1px solid #1f2937; }
+        .timeline-motion { position: absolute; height: 100%; background: #dc2626; width: 4px; box-shadow: 0 0 8px #dc2626; }
+
+        .control-panel { width: 320px; display: flex; flex-direction: column; gap: 15px; flex-shrink: 0; }
+        .control-card { background: #111827; border-radius: 12px; padding: 20px; border: 1px solid #1f2937; }
+        .control-card h3 { margin: 0 0 15px 0; font-size: 13px; color: #dc2626; text-transform: uppercase; letter-spacing: 1px; font-weight: 800; }
+
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; font-size: 11px; color: #94a3b8; margin-bottom: 5px; }
+        select, input { width: 100%; background: #020617; border: 1px solid #1f2937; color: white; padding: 10px; border-radius: 6px; outline: none; font-size: 13px; }
+
+        .btn-action { width: 100%; padding: 12px; background: #dc2626; border: none; color: white; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 13px; transition: 0.3s; }
+        .btn-action:hover { background: #b91c1c; transform: translateY(-2px); }
+        
+        @media (max-width: 1024px) {
+            .playback-content { flex-direction: column; }
+            .control-panel { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- SIDEBAR -->
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h2 class="menu-text">SECURE<span>WATCH</span></h2>
+            <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+        </div>
+
+        <div class="menu-links">
+            <a href="index.html" class="menu-item">
+                <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                <span class="menu-text">Monitoring</span>
+            </a>
+            <a href="logs.html" class="menu-item">
+                <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+                <span class="menu-text">Incident Logs</span>
+            </a>
+            <a href="playback.html" class="menu-item active">
+                <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                <span class="menu-text">Playback</span>
+            </a>
+            <a href="admin_config.html" class="menu-item" id="admin-link">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                <span class="menu-text">AI Settings</span>
+            </a>        
+            <a href="users.html" class="menu-item" id="users-link">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                <span class="menu-text">User Management</span>
+            </a>    
+        </div>
+
+        <a href="login.html" class="logout-btn" onclick="localStorage.clear()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                <polyline points="16 17 21 12 16 7"></polyline>
+                <line x1="21" y1="12" x2="9" y2="12"></line>
+            </svg>
+            <span class="logout-text">Logout</span>
+        </a>
+    </nav>
+
+    <!-- MAIN CONTAINER -->
+    <div class="main-container">
+        <header>
+            <h1 style="margin:0; font-size: 20px;">Video Review</h1>
+            <div id="clock" style="font-family: monospace; color: #dc2626; font-weight: bold; font-size: 1.1rem;">00:00:00 PM</div>
+        </header>
+
+        <div class="playback-content">
+            <div class="player-section">
+                <div class="main-player">
+                    <div style="position: absolute; top: 15px; left: 15px; background: rgba(0,0,0,0.7); padding: 5px 12px; border-radius: 4px; font-size: 12px; border-left: 3px solid #dc2626; z-index: 10;">
+                        ARCHIVE: CAM 02 | PARKING
+                    </div>
+                    <video controls id="videoPlayer">
+                        <source src="your-video.mp4" type="video/mp4">
+                    </video>
+                </div>
+                
+                <div class="timeline-container">
+                    <div style="display: flex; justify-content: space-between; font-size: 11px; color: #94a3b8; margin-bottom: 10px;">
+                        <span>00:00 (Start)</span>
+                        <span>12:00 (Midday)</span>
+                        <span>24:00 (End)</span>
+                    </div>
+                    <div class="timeline-bar">
+                        <div class="timeline-motion" style="left: 15%; width: 2px;"></div>
+                        <div class="timeline-motion" style="left: 42%; width: 10px;"></div>
+                        <div class="timeline-motion" style="left: 70%; width: 3px;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="control-panel">
+                <div class="control-card">
+                    <h3>Search Archive</h3>
+                    <div class="form-group">
+                        <label>Camera Source</label>
+                        <select>
+                            <option>CAM 01 - Highway</option>
+                            <option>CAM 02 - Parking</option>
+                            <option>CAM 03 - Hallway</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Select Date</label>
+                        <input type="date">
+                    </div>
+                    <button class="btn-action">LOAD FOOTAGE</button>
+                </div>
+
+                <div class="control-card">
+                    <h3>Export Tools</h3>
+                    <p style="font-size: 11px; color: #94a3b8; margin-bottom: 15px;">Select start and end points to download clip.</p>
+                    <button class="btn-action" style="background: #10b981;">DOWNLOAD MP4</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('collapsed');
+        }
+
+        setInterval(() => {
+            document.getElementById('clock').innerText = new Date().toLocaleTimeString();
+        }, 1000);
+        document.addEventListener("DOMContentLoaded", function() {
+    // Kunin ang role mula sa localStorage
+    const role = localStorage.getItem("userRole"); 
+    const adminLink = document.getElementById("admin-link");
+
+    // Kung ang role ay hindi admin, itatago ang AI Settings link
+    if (role !== "admin") {
+        if (adminLink) {
+            adminLink.style.display = "none";
+        }
+    }
+});
+document.addEventListener("DOMContentLoaded", () => {
+    // Kunin ang role mula sa localStorage
+    const role = localStorage.getItem("userRole"); 
+
+    // Kung ang role ay operator, i-hide ang User Management link
+    if (role === "operator") {
+        const usersLink = document.getElementById('users-link');
+        if (usersLink) {
+            usersLink.style.display = 'none';
+        }
+    }
+});
+
+
+    </script>
+</body>
+</html>
